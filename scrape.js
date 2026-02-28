@@ -11,11 +11,13 @@ const { chromium } = require('playwright');
     const url = `https://sanand0.github.io/tdsdata/table.html?seed=${seed}`;
     await page.goto(url);
 
-    // Wait for DOM to load properly
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForTimeout(2000);
 
-    const pageNumbers = await page.$$eval("td", cells =>
+    // 🔥 Access iframe
+    const frame = page.frames().find(f => f.url().includes("table"));
+
+    const numbers = await frame.$$eval("td", cells =>
       cells
         .map(td => td.innerText.trim())
         .filter(text => text !== "")
@@ -23,7 +25,7 @@ const { chromium } = require('playwright');
         .filter(num => !isNaN(num))
     );
 
-    const pageSum = pageNumbers.reduce((a, b) => a + b, 0);
+    const pageSum = numbers.reduce((a, b) => a + b, 0);
 
     console.log(`Seed ${seed} sum =`, pageSum);
 
