@@ -8,16 +8,18 @@ const { chromium } = require('playwright');
   let totalSum = 0;
 
   for (let seed of seeds) {
-    const url = `https://sanand0.github.io/tdsdata/table.html?seed=${seed}`;
+    const url = `https://sanand0.github.io/tdsdata/cdp_trap/index.html?seed=${seed}`;
     await page.goto(url);
 
-    // 🔥 Wait for table to actually render
-    await page.waitForSelector("table");
+    // Wait for page to fully render
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
 
-    const numbers = await page.$$eval("table td", cells =>
-      cells
-        .map(c => parseFloat(c.textContent.trim()))
-        .filter(n => !isNaN(n))
+    const numbers = await page.$$eval("*", elements =>
+      elements
+        .map(el => el.textContent)
+        .filter(text => text && !isNaN(parseFloat(text.trim())))
+        .map(text => parseFloat(text.trim()))
     );
 
     const pageSum = numbers.reduce((a, b) => a + b, 0);
